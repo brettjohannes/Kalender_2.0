@@ -11,6 +11,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
@@ -195,44 +200,51 @@ public class MainFX extends Application {
                 });
         //kinnituse nupu põhjal sissekande loomine
         kinnitaSissekanne.setOnAction(e -> {
-            String valik = (String) sissekandeDropDown.getSelectionModel().getSelectedItem();
-            switch (valik) {
-                case "Sündmus":
-                    try {
-                        Sündmus sdLisa = new Sündmus(kirjelduseKast.getText(), kpKast1.getText(), aegKast1.getText(), kpKast2.getText(), aegKast2.getText());
-                        kalender.lisaSissekanne(sdLisa);
-                        System.out.println("Lisasin " + sdLisa);
-                        kalender.väljastaSündmused();
-                    } catch (Exception lisamisError) {
-                        //error tegevus
-                        System.out.println("Tekkis error - SÜNDMUSED");
-                    }
-                    break;
-                case "Meeldetuletus":
-                    try {
-                        Meeldetuletus mtLisa = new Meeldetuletus(kirjelduseKast.getText(), kpKast1.getText(), aegKast1.getText());
-                        kalender.lisaSissekanne(mtLisa);
-                        System.out.println("Lisasin " + mtLisa);
-                        kalender.väljastaMeeldetuletused();
-                    } catch (Exception lisamisError) {
-                        //error tegevus
-                        System.out.println("Tekkis error - MEELDETULETUSED");
-                    }
-                    break;
-                case "Ülesanne":
-                    try {
-                        Ülesanne ülLisa = new Ülesanne(kirjelduseKast.getText(), kpKast1.getText(), aegKast1.getText());
-                        kalender.lisaSissekanne(ülLisa);
-                        System.out.println("Lisasin: " + ülLisa);
-                        kalender.väljastaÜlesanded();
-                    } catch (Exception lisamisError) {
-                        //error tegevus
-                        System.out.println("Tekkis error - ÜLESANDED");
-                    }
-                    break;
-                default:
-                    //ei tee midagi..?
-                    break;
+            if (kirjelduseKast.getText().contains(";") || kirjelduseKast.getText().isBlank()) { // märki ; kasutatakse faili salvestamisel, seega keelatud
+                viganeSisend("Vigane sisend! Kirjeldus ei tohi olla tühi ega sisaldada märki ';'");
+            } else {
+                String valik = sissekandeDropDown.getSelectionModel().getSelectedItem(); //dropdown menüüs tehtud valik
+                switch (valik) {
+                    case "Sündmus":
+                        try {
+                            Sündmus sdLisa = new Sündmus(kirjelduseKast.getText(), kpKast1.getText(), aegKast1.getText(), kpKast2.getText(), aegKast2.getText());
+                            kalender.lisaSissekanne(sdLisa);
+                            System.out.println("Lisasin " + sdLisa);
+                            kalender.väljastaSündmused();
+                        } catch (Exception lisamisError) {
+                            //error tegevus
+                            viganeSisend("Vigane sisend! Kontrolli aja sisendit ja formaati");
+                            System.out.println("Tekkis error - SÜNDMUSED");
+                        }
+                        break;
+                    case "Meeldetuletus":
+                        try {
+                            Meeldetuletus mtLisa = new Meeldetuletus(kirjelduseKast.getText(), kpKast1.getText(), aegKast1.getText());
+                            kalender.lisaSissekanne(mtLisa);
+                            System.out.println("Lisasin " + mtLisa);
+                            kalender.väljastaMeeldetuletused();
+                        } catch (Exception lisamisError) {
+                            //error tegevus
+                            viganeSisend("Vigane sisend! Kontrolli aja sisendit ja formaati");
+                            System.out.println("Tekkis error - MEELDETULETUSED");
+                        }
+                        break;
+                    case "Ülesanne":
+                        try {
+                            Ülesanne ülLisa = new Ülesanne(kirjelduseKast.getText(), kpKast1.getText(), aegKast1.getText());
+                            kalender.lisaSissekanne(ülLisa);
+                            System.out.println("Lisasin: " + ülLisa);
+                            kalender.väljastaÜlesanded();
+                        } catch (Exception lisamisError) {
+                            //error tegevus
+                            viganeSisend("Vigane sisend! Kontrolli aja sisendit ja formaati");
+                            System.out.println("Tekkis error - ÜLESANDED");
+                        }
+                        break;
+                    default:
+                        //ei tee midagi..?
+                        break;
+                }
             }
         });
 
@@ -247,5 +259,58 @@ public class MainFX extends Application {
         sissekandePaneel.add(tagasiNupp2,0,2);
 
         return new Scene(sissekandePaneel);
+    }
+
+    private void viganeSisend(String veaKirjeldus) {
+        Stage veaAken = new Stage();
+        veaAken.setResizable(false);
+        veaAken.initModality(Modality.APPLICATION_MODAL); //keelab rakenduse teiste akende kasutamise
+
+        Button nVäljuViga = new Button("OK!");
+        nVäljuViga.setOnAction(e -> veaAken.close());
+        Text veaTeade = new Text(veaKirjeldus);
+
+        VBox veaPaneel = new VBox();
+        VBox.setMargin(veaTeade, new Insets(20,20,20,20));
+        VBox.setMargin(nVäljuViga, new Insets(20,20,20,20));
+        ObservableList<javafx.scene.Node> veaKuva = veaPaneel.getChildren();
+        veaKuva.addAll(veaTeade, nVäljuViga);
+        Scene veaStseen = new Scene(veaPaneel);
+
+        veaAken.setTitle("Vigane sisend!");
+        veaAken.setScene(veaStseen);
+        veaAken.sizeToScene();
+        veaAken.show();
+    }
+
+    private Scene animatsioonMeetod(Stage primaryStage) {
+        String pealkiri = "Kalender extraordinaire";
+        HBox tähed = new HBox(0);
+        tähed.setAlignment(Pos.CENTER);
+        for (int i = 0; i < pealkiri.length(); i++) {
+            Text täht = new Text(pealkiri.charAt(i) + "");
+            täht.setFont(Font.font("verdana", FontWeight.BLACK, FontPosture.ITALIC, 20));
+            täht.setFill(Color.BLACK);
+            tähed.getChildren().add(täht);
+
+            TranslateTransition tt = new TranslateTransition(Duration.seconds(2), täht);
+            tt.setDelay(Duration.millis(i * 50));
+            tt.setToY(-25);
+            tt.setAutoReverse(true);
+            tt.setCycleCount(2);
+            tt.play();
+        }
+
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.BOTTOM_CENTER);
+        Text tekst = new Text("Kliki siia");
+        tekst.setOnMouseClicked(event -> primaryStage.setScene(peaMenüü));
+        hbox.getChildren().add(tekst);
+
+        VBox vbox = new VBox();
+        vbox.setAlignment(Pos.CENTER);
+        vbox.getChildren().addAll(tähed, tekst);
+
+        return new Scene(vbox);
     }
 }
