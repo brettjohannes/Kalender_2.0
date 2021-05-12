@@ -35,7 +35,7 @@ public class Kalender {
             if (fail.createNewFile()) {
                 System.out.println("Loodud uus fail: " + failinimi);
             } else {
-                System.out.println("Fail nimega " + failinimi + "juba olemas, kirjutan üle.");
+                System.out.println("Fail nimega " + failinimi + " juba olemas, kirjutan üle.");
             }
         } catch (IOException e) {
             System.out.println("\nFaili loomisel tekkis error.");
@@ -134,8 +134,7 @@ public class Kalender {
         for (Sündmus sündmus : sündmused) {
             list.add(sündmus.toString());
         }
-        ObservableList<String> olist = FXCollections.observableList(list);
-        return olist;
+        return FXCollections.observableList(list);
     }
 
     public void väljastaMeeldetuletused() {
@@ -149,8 +148,7 @@ public class Kalender {
         for (Meeldetuletus meeldetuletus : meeldetuletused) {
             list.add(meeldetuletus.toString());
         }
-        ObservableList<String> olist = FXCollections.observableList(list);
-        return olist;
+        return FXCollections.observableList(list);
     }
 
     public void väljastaÜlesanded() {
@@ -164,8 +162,7 @@ public class Kalender {
         for (Ülesanne ülesanne : ülesanded) {
             list.add(ülesanne.toString());
         }
-        ObservableList<String> olist = FXCollections.observableList(list);
-        return olist;
+        return FXCollections.observableList(list);
     }
 
     //KALENDRI ENDA MEETODID
@@ -177,14 +174,6 @@ public class Kalender {
         väljastaMeeldetuletused();
         System.out.println("Ülesanded:");
         väljastaÜlesanded();
-    }
-
-    List<Sissekanne> tagastaKalender() {
-        List<Sissekanne> list = new ArrayList<>();
-        list.addAll(sündmused);
-        list.addAll(meeldetuletused);
-        list.addAll(ülesanded);
-        return list;
     }
 
     void väljastaPüha() {

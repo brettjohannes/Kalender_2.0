@@ -1,5 +1,6 @@
 package kalender;
 
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,18 +16,21 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.text.Text;
 import javafx.scene.control.TextField;
 import javafx.beans.value.ObservableValue;
+import javafx.util.Duration;
 
 import java.io.IOException;
 
 public class MainFX extends Application {
 
-    Scene peaMenüü, kalendriVaade, sissekandeLisamine;
+    Scene animatsioon, peaMenüü, kalendriVaade, sissekandeLisamine;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
         Kalender kalender = new Kalender();
         kalender.loeKalender("kalender.txt");
         primaryStage.setTitle("Kalender Extraordinaire 2021");
+
+        animatsioon = animatsioonMeetod(primaryStage);
 
         //PEAMENÜÜ
         peaMenüü = peamenüüMeetod(primaryStage, kalender);
@@ -37,7 +41,7 @@ public class MainFX extends Application {
         //LISA SISSEKANNE
         sissekandeLisamine = sissekandeLisamineMeetod(primaryStage, kalender);
 
-        primaryStage.setScene(peaMenüü);
+        primaryStage.setScene(animatsioon);
         primaryStage.setMinWidth(400);
         primaryStage.setMinHeight(400);
         primaryStage.show();
@@ -86,16 +90,33 @@ public class MainFX extends Application {
         kõikSissekanded.setItems(sissekanded);
 
         Button kõikSissekandedNupp = new Button("Kõik");
-        kõikSissekandedNupp.setOnAction(event -> kõikSissekanded.setItems(sissekanded));
+        kõikSissekandedNupp.setOnAction(event -> {
+            ObservableList<String> sündmused1 = kalender.tagastaSündmused();
+            ObservableList<String> meeldetuletused1 = kalender.tagastaMeeldetuletused();
+            ObservableList<String> ülesanded1 = kalender.tagastaÜlesanded();
+            ObservableList<String> sissekanded1 = FXCollections.observableArrayList(sündmused1);
+            sissekanded1.addAll(meeldetuletused1);
+            sissekanded1.addAll(ülesanded1);
+            kõikSissekanded.setItems(sissekanded1);
+        });
 
         Button sündmusedNupp = new Button("Sündmused");
-        sündmusedNupp.setOnAction(event -> kõikSissekanded.setItems(sündmused));
+        sündmusedNupp.setOnAction(event -> {
+            ObservableList<String> sündmused1 = kalender.tagastaSündmused();
+            kõikSissekanded.setItems(sündmused1);
+        });
 
         Button meeldetuletusedNupp = new Button("Meeldetuletused");
-        meeldetuletusedNupp.setOnAction(event -> kõikSissekanded.setItems(meeldetuletused));
+        meeldetuletusedNupp.setOnAction(event -> {
+            ObservableList<String> meeldetuletused1 = kalender.tagastaMeeldetuletused();
+            kõikSissekanded.setItems(meeldetuletused1);
+        });
 
         Button ülesandedNupp = new Button("Ülesanded");
-        ülesandedNupp.setOnAction(event -> kõikSissekanded.setItems(ülesanded));
+        ülesandedNupp.setOnAction(event -> {
+            ObservableList<String> ülesanded1 = kalender.tagastaÜlesanded();
+            kõikSissekanded.setItems(ülesanded1);
+        });
 
         Button kustutaNupp = new Button("Kustuta");
         kustutaNupp.setOnAction(event -> {
@@ -138,7 +159,7 @@ public class MainFX extends Application {
                 "Sündmus",
                 "Ülesanne"
         );
-        final ComboBox sissekandeDropDown = new ComboBox(sissekandeTüüp);
+        final ComboBox<String> sissekandeDropDown = new ComboBox<>(sissekandeTüüp);
         //infotekst
         Text sissekanneTeavitus = new Text ("Vali sissekande tüüp:");
         //kirjeldus
